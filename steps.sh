@@ -6,6 +6,7 @@ kubectl apply -f webhook-deployment.yaml
 kubectl apply -f webhook-configuration.yaml
 kubectl get mutatingwebhookconfiguration
 
+kubectl get secret webhook-tls -n default -o jsonpath='{.data.tls\.crt}'
 
 kubectl label namespace default team=dev env=staging
 kubectl get pod test-pod -o jsonpath='{.metadata.labels}'

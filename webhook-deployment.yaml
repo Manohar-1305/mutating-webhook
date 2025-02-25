@@ -17,7 +17,7 @@ spec:
       - name: webhook
         image: manoharshetty507/webhook:v1  # Use your actual image
         ports:
-        - containerPort: 443
+        - containerPort: 8443  # Ensure it matches the application's listening port
         volumeMounts:
         - name: tls-certs
           mountPath: "/tls"
@@ -37,5 +37,5 @@ spec:
     app: webhook
   ports:
     - protocol: TCP
-      port: 443
-      targetPort: 443
+      port: 8443  # Exposed service port
+      targetPort: 8443  # Forward to the correct container port

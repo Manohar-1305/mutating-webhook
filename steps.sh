@@ -17,4 +17,5 @@ openssl req -x509 -newkey rsa:4096 -keyout webhook.key -out webhook.crt -days 36
 openssl req -newkey rsa:4096 -nodes -keyout tls.key -x509 -days 365 -out tls.crt -subj "/CN=webhook-service.default.svc"
 
 kubectl create secret tls webhook-tls --cert=webhook.crt --key=webhook.key -n default
+cat webhook.crt | base64 | tr -d '\n'
 

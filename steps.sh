@@ -14,6 +14,7 @@ kubectl label namespace default team=dev env=staging
 kubectl get pod test-pod -o jsonpath='{.metadata.labels}'
 
 openssl req -x509 -newkey rsa:4096 -keyout webhook.key -out webhook.crt -days 365 -nodes -subj "/CN=webhook-service"
+openssl req -newkey rsa:4096 -nodes -keyout tls.key -x509 -days 365 -out tls.crt -subj "/CN=webhook-service.default.svc"
 
 kubectl create secret tls webhook-tls --cert=webhook.crt --key=webhook.key -n default
 

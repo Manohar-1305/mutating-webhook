@@ -7,6 +7,7 @@ docker push manoharshetty507/webhook:v1
 kubectl apply -f webhook-deployment.yaml
 kubectl apply -f webhook-configuration.yaml
 kubectl get mutatingwebhookconfiguration
+docker rmi -f $(docker images -q)
 
 kubectl get secret webhook-tls -n default -o jsonpath='{.data.tls\.crt}'
 

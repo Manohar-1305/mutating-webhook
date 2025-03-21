@@ -1,3 +1,5 @@
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,15 +17,15 @@ spec:
     spec:
       containers:
       - name: webhook
-        image: manoharshetty507/webhook:v1  # Use your actual image
+        image: manoharshetty507/webhook:v1
         ports:
-        - containerPort: 8443  # Ensure it matches the application's listening port
+        - containerPort: 8443
         volumeMounts:
-        - name: tls-certs
-          mountPath: "/tls"
+        - name: tls-secret
+          mountPath: /tls
           readOnly: true
       volumes:
-      - name: tls-certs
+      - name: tls-secret
         secret:
           secretName: webhook-tls
 ---
@@ -33,9 +35,10 @@ metadata:
   name: webhook-service
   namespace: default
 spec:
+  ports:
+  - protocol: TCP
+    port: 443
+    targetPort: 8443
   selector:
     app: webhook
-  ports:
-    - protocol: TCP
-      port: 8443  # Exposed service port
-      targetPort: 8443  # Forward to the correct container port
+

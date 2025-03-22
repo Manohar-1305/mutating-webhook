@@ -3,6 +3,8 @@ openssl req -x509 -newkey rsa:4096 -keyout tls.key -out tls.crt -days 365 -nodes
 
 kubectl create secret tls webhook-tls --cert=tls.crt --key=tls.key -n default
 docker build -t manoharshetty507/webhook:v1 .
+ docker tag manoharshetty507/webhook:v2 manoharshetty507/webhook:v2
+
 docker push manoharshetty507/webhook:v1
 kubectl apply -f webhook-deployment.yaml
 kubectl apply -f webhook-configuration.yaml

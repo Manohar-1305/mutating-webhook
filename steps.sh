@@ -35,3 +35,20 @@ kubectl create secret tls tls --cert=tls.crt --key=tls.key
 CA_CERT=$(cat tls.crt | base64)
 sed -e 's@CA-CERT@'"$CA_CERT"'@g' <"manifests/webhook-template.yaml" > manifests/webhook.yaml
 kubectl apply -f manifests/webhook.yaml
+
+-------------------------------------------
+openssl req -new -newkey rsa:2048 -nodes -keyout tls.key -out tls.csr -subj "/CN=webhook-service.default.svc"
+openssl x509 -req -in tls.csr -signkey tls.key -out tls.crt -days 365
+ls -l
+CA_CERT=$(cat tls.crt | base64 | tr -d '\n')
+echo $CA_CERT
+sed -i "s|\${CA_BUNDLE}|${CA_CERT}|g" webhook-configuration.yaml
+grep caBundle webhook-configuration.yaml
+
+kubectl create secret tls webhook-tls --cert=tls.crt --key=tls.key -n default
+
+
+kubectl apply -f webhook-configuration.yaml
+kubectl apply -f webhook-deployment.yaml
+
+kubectl get mutatingwebhookconfigurations

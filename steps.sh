@@ -101,3 +101,12 @@ Enable ns
 kubectl label namespace test ns-label-sync=enabled
 
 
+test the sample yaml
+kubectl label namespace default ns-label-sync=enabled --overwrite
+kubectl label namespace default env=from-ns --overwrite
+kubectl label namespace default team=devops --overwrite
+kubectl apply -f testing-pod.yaml
+kubectl get pod test-pod -n default --show-labels
+
+
+

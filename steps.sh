@@ -93,6 +93,10 @@ change it to: --enable-admission-plugins=NodeRestriction,MutatingAdmissionWebhoo
 encode
 base64 -w0 tls.crt
 ==========================================================
+kubectl delete deployment nginx -n test --ignore-not-found
+kubectl create deployment nginx --image=nginx -n test
+kubectl get pods -n test --show-labels
+
 Enable ns 
 kubectl label namespace test ns-label-sync=enabled
 

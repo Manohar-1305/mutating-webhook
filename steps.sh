@@ -65,8 +65,8 @@ openssl x509 -req -in tls.csr -signkey tls.key \
   -out tls.crt -days 365 \
   -extensions v3_req -extfile san.cnf
 
-  ===========
-  kubectl delete secret webhook-tls -n webhook-system --ignore-not-found
+ ===========
+kubectl delete secret webhook-tls -n webhook-system --ignore-not-found
 
 kubectl create secret tls webhook-tls \
   --cert=tls.crt \
@@ -77,4 +77,21 @@ kubectl rollout restart deployment webhook -n webhook-system
 kubectl delete deployment nginx -n test --ignore-not-found
 kubectl create deployment nginx --image=nginx -n test
 kubectl get pods -n test --show-labels
+===========================================================
+kubectl rollout restart deployment webhook -n webhook-system
+kubectl delete deployment nginx -n test --ignore-not-found
+kubectl create deployment nginx --image=nginx -n test
+kubectl get pods -n test --show-labels
+
+==============
+Add mutaring webhook
+vi /etc/kubernetes/manifests/kube-apiserver.yaml
+
+change it to: --enable-admission-plugins=NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
+
+===========================================================
+encode
+base64 -w0 tls.crt
+
+
 

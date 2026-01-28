@@ -1,21 +1,32 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: webhook-config
+  name: ns-label-webhook
 webhooks:
-  - name: webhook.default.svc
-    clientConfig:
-      service:
-        name: webhook-service
-        namespace: default
-        path: "/mutate"
-        port: 443
-      caBundle: ${CA_BUNDLE}  # Replace with actual base64-encoded CA certificate
-    rules:
-      - operations: ["CREATE"]
-        apiGroups: [""]
-        apiVersions: ["v1"]
-        resources: ["pods"]
-    admissionReviewVersions: ["v1"]
-    sideEffects: None
-    timeoutSeconds: 5
+- name: ns-label-webhook.webhook-system.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Ignore
+  timeoutSeconds: 5
+
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: webhook-system
+      path: /mutate
+      port: 443
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURqVENDQW5XZ0F3SUJBZ0lVS2N1ZXdkdVBHTWlqanpldnFObDBVTktHU0RNd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0xURXJNQ2tHQTFVRUF3d2lkMlZpYUc5dmF5MXpaWEoyYVdObExuZGxZbWh2YjJzdGMzbHpkR1Z0TG5OMgpZekFlRncweU5qQXhNamd4TnpJeE1ETmFGdzB5TnpBeE1qZ3hOekl4TUROYU1DMHhLekFwQmdOVkJBTU1JbmRsClltaHZiMnN0YzJWeWRtbGpaUzUzWldKb2IyOXJMWE41YzNSbGJTNXpkbU13Z2dFaU1BMEdDU3FHU0liM0RRRUIKQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUURBRzNrdHJod0MvMG9seXEwMjZkWXRCNlM0TzQzeUpnMWFQNVdiZzU1UQpkRElPbE96WGpsY1VLY0JHZ25oYmM0RWJSNHYvRUd1M0k1L01iVW1qTWxoMTdkM3dQRk1yVjJLVDl0N2x3RHQyCkg4V0lBY25QUlJFYS9NTEJNWWI4M1dDS3FwQU9pQnE4aDVVSWlWRkU4akJJem9KWXZCT0V5NlIyelhuSXZ5WlUKQzM5M3dIMDNvd3RaUHNsQlRXTUV1VFFNNHJEbXZ4eGZXc1dWaGE0bjZLMVU0c0NnWHBwclAxcTZUWXU4djFCawpGd04xcGR6ZWNxNUNNeDl2alE3bndXNGFXS1NsbllPMjBBbUhrV21xSmk3MVNvVHF5V3BTZHlLSndhdFAyYzBzCkJCQ1RtbVNuSFM3WnZ2dU80Wm16VzBra0JLandiWWhObFFrSThpV1h6L0cvQWdNQkFBR2pnYVF3Z2FFd0N3WUQKVlIwUEJBUURBZ1F3TUJNR0ExVWRKUVFNTUFvR0NDc0dBUVVGQndNQk1GNEdBMVVkRVFSWE1GV0NEM2RsWW1odgpiMnN0YzJWeWRtbGpaWUllZDJWaWFHOXZheTF6WlhKMmFXTmxMbmRsWW1odmIyc3RjM2x6ZEdWdGdpSjNaV0pvCmIyOXJMWE5sY25acFkyVXVkMlZpYUc5dmF5MXplWE4wWlcwdWMzWmpNQjBHQTFVZERnUVdCQlRMM0ZVZjc0UUsKRE1xYlB0Rm5zMGUrbHZoNVlUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUF0aWViREwvTTAyQUdua0ZtU0xVcwpzRHRhQkliTHVmQjJtVDlXV3Uxa3lkSHJ6QnZWNVVmZzZWSDFCMXZKSDlYRC9IVmN4S0hzOHlYSlhXRGwreTRpCk9QOTJ6cVVvTm1ma2lXbWlmS1BnNVorQXlhd0tDb3NXaVZCQW9SL2dIbmszV3k0NmpZYm5IMHJ6VHpFakx3cXcKNHZnQ04xTE1BaE1mQ2Jhc2hlNVNXODB2QUZJL29kTW9ZYjl4RSt4QnlIT1VSRTd1UzFIZk1aTXVkdEhZaTFxMwpVbTh5Qnk1VXVsZ3JMTHdUUUhWYWlEanpERndqZldoZ1cwR2krZ0FDV3R6MEhrMjdPbnhqUVNCYnlzbUZjTW9QCnN4RFZzM0N3MTR3Q28wcGRCY0JMWDNqZ1VWeFVZeEVZdzFuUWZjNlJOTFlPMjFrZFhhSEx5VW9RdGpaeHNJNjUKWFE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  namespaceSelector:
+    matchExpressions:
+    - key: ns-label-sync
+      operator: In
+      values:
+      - enabled
+
+  rules:
+  - operations: ["CREATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    scope: "Namespaced"
+

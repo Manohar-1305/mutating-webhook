@@ -20,7 +20,7 @@ def mutate():
     namespace = req.get("namespace")
     kind = req.get("kind", {}).get("kind")
 
-    # 🔥 THIS MUST BE Pod
+    # Only mutate Pods
     if kind != "Pod" or not namespace:
         return allow(uid)
 
@@ -28,15 +28,21 @@ def mutate():
     ns_labels = v1.read_namespace(namespace).metadata.labels or {}
 
     patch = []
+
+    # 1️⃣ Ensure metadata.labels exists
+    patch.append({
+        "op": "add",
+        "path": "/metadata/labels",
+        "value": {}
+    })
+
+    # 2️⃣ Add namespace labels
     for k, v in ns_labels.items():
         patch.append({
             "op": "add",
             "path": "/metadata/labels/" + esc(k),
             "value": v
         })
-
-    if not patch:
-        return allow(uid)
 
     return jsonify({
         "apiVersion": "admission.k8s.io/v1",

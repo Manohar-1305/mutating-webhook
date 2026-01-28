@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: webhook
-        image: ns-label-webhook:1.0
-        imagePullPolicy: Never
+        image: manoharshetty507/webhook:v1
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8443
         volumeMounts:
@@ -37,5 +37,6 @@ spec:
   selector:
     app: webhook
   ports:
-  - port: 443
+  - protocol: TCP
+    port: 443
     targetPort: 8443

@@ -92,6 +92,8 @@ change it to: --enable-admission-plugins=NodeRestriction,MutatingAdmissionWebhoo
 ===========================================================
 encode
 base64 -w0 tls.crt
-
+==========================================================
+Enable ns 
+kubectl label namespace test ns-label-sync=enabled
 
 

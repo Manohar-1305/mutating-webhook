@@ -20,6 +20,7 @@ openssl req -x509 -newkey rsa:4096 -keyout webhook.key -out webhook.crt -days 36
 openssl req -newkey rsa:4096 -nodes -keyout tls.key -x509 -days 365 -out tls.crt -subj "/CN=webhook-service.default.svc"
 
 kubectl create secret tls webhook-tls --cert=webhook.crt --key=webhook.key -n default
+
 cat webhook.crt | base64 | tr -d '\n'
 
 -------------------------------------------
@@ -52,3 +53,28 @@ kubectl apply -f webhook-configuration.yaml
 kubectl apply -f webhook-deployment.yaml
 
 kubectl get mutatingwebhookconfigurations
+=========================
+working
+=========================
+
+openssl genrsa -out tls.key 2048
+
+openssl req -new -key tls.key -out tls.csr -config san.cnf
+
+openssl x509 -req -in tls.csr -signkey tls.key \
+  -out tls.crt -days 365 \
+  -extensions v3_req -extfile san.cnf
+
+  ===========
+  kubectl delete secret webhook-tls -n webhook-system --ignore-not-found
+
+kubectl create secret tls webhook-tls \
+  --cert=tls.crt \
+  --key=tls.key \
+  -n webhook-system
+==============
+kubectl rollout restart deployment webhook -n webhook-system
+kubectl delete deployment nginx -n test --ignore-not-found
+kubectl create deployment nginx --image=nginx -n test
+kubectl get pods -n test --show-labels
+

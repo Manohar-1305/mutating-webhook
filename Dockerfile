@@ -1,11 +1,6 @@
-FROM python:3.9-slim
-
+FROM python:3.11-slim
 WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY webhook.py .
-COPY tls /tls  
-
-CMD ["python", "webhook.py"]
+RUN pip install flask kubernetes
+COPY app.py /app/app.py
+EXPOSE 8443
+CMD ["python", "/app/app.py"]

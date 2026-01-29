@@ -154,3 +154,10 @@ docker images
 docker tag manoharshetty507/webhook:v2 manoharshetty507/webhook:v2
 docker push manoharshetty507/webhook:v2
 
+- Label Node
+kubectl label node master01 team=testing
+
+- Remove Label on Node
+kubectl label node master01 team-
+
+

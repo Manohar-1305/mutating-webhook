@@ -113,7 +113,10 @@ kubectl get pod test-pod -n default --show-labels
 kubectl create namespace prod
 
 # 2️⃣ Label the namespace so the webhook applies
-kubectl label namespace prod ns-label-sync=enabled env=prod --overwrite
+kubectl label namespace prod ns-label-sync=enabled env=prod team=development --overwrite
+
+kubectl get namespace prod --show-labels
+
 
 # 3️⃣ Create a test deployment in that namespace
 kubectl create deployment nginx --image=nginx -n prod
@@ -124,8 +127,29 @@ kubectl get pods -n prod --show-labels
 # 5️⃣ Describe one pod to confirm labels came from the namespace
 kubectl get pod -n prod -o jsonpath='{.items[0].metadata.labels}'
 
+Testing Team:
+-------------
+# 1️⃣ Create a new namespace
+kubectl create namespace testing
+
+# 2️⃣ Label the namespace so the webhook applies
+kubectl label namespace testing ns-label-sync=enabled env=testing team=testing --overwrite
+
+kubectl get namespace testing --show-labels
+
+
+# 3️⃣ Create a test deployment in that namespace
+kubectl create deployment nginx --image=nginx -n testing
+
+# 4️⃣ Verify pods and labels
+kubectl get pods -n testing --show-labels
+
+# 5️⃣ Describe one pod to confirm labels came from the namespace
+kubectl get pod -n testing -o jsonpath='{.items[0].metadata.labels}'
 ------------------------------------
 docker build -t manoharshetty507/webhook:v2 .
+ctr -n k8s.io images import <(docker save manoharshetty507/webhook:v3)
+
 docker images
 docker tag manoharshetty507/webhook:v2 manoharshetty507/webhook:v2
 docker push manoharshetty507/webhook:v2

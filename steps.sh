@@ -124,4 +124,9 @@ kubectl get pods -n prod --show-labels
 # 5️⃣ Describe one pod to confirm labels came from the namespace
 kubectl get pod -n prod -o jsonpath='{.items[0].metadata.labels}'
 
+------------------------------------
+docker build -t manoharshetty507/webhook:v2 .
+docker images
+docker tag manoharshetty507/webhook:v2 manoharshetty507/webhook:v2
+docker push manoharshetty507/webhook:v2
 

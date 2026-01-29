@@ -1,3 +1,5 @@
+# 🔴 RESULT: pod will NOT schedule first
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,6 +15,11 @@ spec:
       labels:
         app: nginx
     spec:
+      nodeSelector:
+        team: testing
       containers:
       - name: nginx
         image: nginx
+---
+# 🔴 make sure node has NO label
+# kubectl label node master01 team-

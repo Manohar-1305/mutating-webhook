@@ -160,4 +160,5 @@ kubectl label node master01 team=testing
 - Remove Label on Node
 kubectl label node master01 team-
 
+kubectl label namespace prod ns-label-sync=enabled env=testing team=testing --overwrite
 

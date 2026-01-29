@@ -1,4 +1,3 @@
-cat > san.cnf <<EOF
 [req]
 distinguished_name = req_distinguished_name
 req_extensions = v3_req
@@ -16,4 +15,3 @@ subjectAltName = @alt_names
 DNS.1 = webhook-service
 DNS.2 = webhook-service.webhook-system
 DNS.3 = webhook-service.webhook-system.svc
-EOF

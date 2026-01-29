@@ -108,5 +108,20 @@ kubectl label namespace default team=devops --overwrite
 kubectl apply -f testing-pod.yaml
 kubectl get pod test-pod -n default --show-labels
 
+------------------------------
+# 1️⃣ Create a new namespace
+kubectl create namespace prod
+
+# 2️⃣ Label the namespace so the webhook applies
+kubectl label namespace prod ns-label-sync=enabled env=prod --overwrite
+
+# 3️⃣ Create a test deployment in that namespace
+kubectl create deployment nginx --image=nginx -n prod
+
+# 4️⃣ Verify pods and labels
+kubectl get pods -n prod --show-labels
+
+# 5️⃣ Describe one pod to confirm labels came from the namespace
+kubectl get pod -n prod -o jsonpath='{.items[0].metadata.labels}'
 
 

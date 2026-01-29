@@ -162,3 +162,5 @@ kubectl label node master01 team-
 
 kubectl label namespace prod ns-label-sync=enabled env=testing team=testing --overwrite
 
+kubectl get pod -n prod -o yaml | grep -A5 nodeSelector
+

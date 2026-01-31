@@ -100,6 +100,10 @@ kubectl create secret tls webhook-tls \
   --key=tls.key \
   -n webhook-system
 ==============
+# Build the image
+docker build -t manoharshetty507/webhook:v2 .
+ctr -n k8s.io images import <(docker save manoharshetty507/webhook:v3)
+===========================================
 kubectl rollout restart deployment webhook -n webhook-system
 kubectl delete deployment nginx -n test --ignore-not-found
 kubectl create deployment nginx --image=nginx -n test
@@ -110,10 +114,7 @@ kubectl delete deployment nginx -n test --ignore-not-found
 kubectl create deployment nginx --image=nginx -n test
 kubectl get pods -n test --show-labels
 
-==============
-# Build the image
-docker build -t manoharshetty507/webhook:v2 .
-ctr -n k8s.io images import <(docker save manoharshetty507/webhook:v3)
+
 ===========================================================
 encode
 base64 -w0 tls.crt

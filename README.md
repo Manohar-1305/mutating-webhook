@@ -38,7 +38,7 @@ Docker + containerd
 OpenSSL
 kubectl
 
-  **Step 1: Enable Admission Webhooks
+*Step 1: Enable Admission Webhooks
 
 Edit the API server manifest:
 vi /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -51,8 +51,9 @@ Important:
 If this flag is missing, the webhook will never be invoked.
 Kubernetes will not warn you.
 
-** Step 2: Generate TLS Certificate (SAN Required)
+* Step 2: Generate TLS Certificate (SAN Required)
 Create SAN Configuration
+```
 cat > san.cnf <<EOF
 [req]
 distinguished_name = req_distinguished_name
@@ -72,8 +73,9 @@ DNS.1 = webhook-service
 DNS.2 = webhook-service.webhook-system
 DNS.3 = webhook-service.webhook-system.svc
 EOF
-
-Generate Key and Certificate
+```
+* Generate Key and Certificate
+```
 openssl genrsa -out tls.key 2048
 
 openssl req -new -key tls.key -out tls.csr -config san.cnf
@@ -81,47 +83,53 @@ openssl req -new -key tls.key -out tls.csr -config san.cnf
 openssl x509 -req -in tls.csr -signkey tls.key \
   -out tls.crt -days 365 \
   -extensions v3_req -extfile san.cnf
-
+```
 
 Note:
 SAN is mandatory.
 CN-only certificates will fail silently.
 
-Step 3: Create Kubernetes TLS Secret
-kubectl delete secret webhook-tls -n webhook-system --ignore-not-found
-
+* Step 3: Create Kubernetes TLS Secret
+```
 kubectl create secret tls webhook-tls \
   --cert=tls.crt \
   --key=tls.key \
   -n webhook-system
-
-Step 4: Build and Push Webhook Image
+```
+* Step 4: Build and Push Webhook Image
 Build Image
+```
 docker build -t manoharshetty507/webhook:v3 .
-
+```
 Import into containerd
+```
 ctr -n k8s.io images import <(docker save manoharshetty507/webhook:v3)
-
+```
 Push to Registry
+```
 docker push manoharshetty507/webhook:v3
-
-Step 5: Apply Webhook Manifests
+```
+* Step 5: Apply Webhook Manifests
 Encode Certificate
+```
 base64 -w0 tls.crt
-
-Apply Resources
+```
+* Apply Resources
+```
 kubectl apply -f webhook-configuration.yaml
 kubectl apply -f webhook-deployment.yaml
+```
 
 Verify
+```
 kubectl get mutatingwebhookconfigurations
-
-Step 6: Enable Webhook per Namespace
-
+```
+* Step 6: Enable Webhook per Namespace
 The webhook runs only if the namespace has this label:
 
+```
 ns-label-sync=enabled
-
+```
 Example: Default Namespace
 kubectl label namespace default ns-label-sync=enabled --overwrite
 kubectl label namespace default env=from-ns --overwrite
@@ -135,10 +143,11 @@ kubectl get pod test-pod -n default --show-labels
 Result:
 Pod automatically inherits namespace labels.
 
-Step 7: Full Scheduling Test
+* Step 7: Full Scheduling Test
 Create Testing Namespace
+```
 kubectl create namespace testing
-
+```
 * Label Namespace
 ```
 kubectl label namespace testing \

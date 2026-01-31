@@ -108,9 +108,24 @@ kubectl apply -f webhook-configuration.yaml
 kubectl apply -f webhook-deployment.yaml
 kubectl get mutatingwebhookconfigurations
 # Test it
-kubectl delete deployment nginx -n test --ignore-not-found
-kubectl create deployment nginx --image=nginx -n test
-kubectl get pods -n test --show-labels
+Enable ns 
+kubectl label namespace test ns-label-sync=enabled
+
+test the sample yaml
+kubectl label namespace default ns-label-sync=enabled --overwrite
+kubectl label namespace default env=from-ns --overwrite
+kubectl label namespace default team=devops --overwrite
+kubectl apply -f testing-pod.yaml
+kubectl get pod test-pod -n default --show-labels
+
+# Test Pod Scheduling
+k apply -f testing-pod.yaml
+It will be in pending state
+
+# Label Node - Pod is scheduled
+kubectl label node master01 team=testing
+
+
 ===========================================================
 kubectl rollout restart deployment webhook -n webhook-system
 kubectl delete deployment nginx -n test --ignore-not-found
@@ -125,16 +140,7 @@ kubectl delete deployment nginx -n test --ignore-not-found
 kubectl create deployment nginx --image=nginx -n test
 kubectl get pods -n test --show-labels
 
-Enable ns 
-kubectl label namespace test ns-label-sync=enabled
 
-
-test the sample yaml
-kubectl label namespace default ns-label-sync=enabled --overwrite
-kubectl label namespace default env=from-ns --overwrite
-kubectl label namespace default team=devops --overwrite
-kubectl apply -f testing-pod.yaml
-kubectl get pod test-pod -n default --show-labels
 
 ------------------------------
 # 1️⃣ Create a new namespace

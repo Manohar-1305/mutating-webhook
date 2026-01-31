@@ -215,7 +215,8 @@ kubectl label namespace prod team=devops --overwrite
 Test Pod
 ```
 kubectl apply -f testing-pod.yaml
-kubectl get pod test-pod -n default --show-labels
+kubectl get pod -n default -l app=nginx --show-labels
+
 ```
 
 Result:

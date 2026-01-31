@@ -49,10 +49,6 @@ grep caBundle webhook-configuration.yaml
 kubectl create secret tls webhook-tls --cert=tls.crt --key=tls.key -n default
 
 
-kubectl apply -f webhook-configuration.yaml
-kubectl apply -f webhook-deployment.yaml
-
-kubectl get mutatingwebhookconfigurations
 =========================
 working
 =========================
@@ -101,23 +97,29 @@ kubectl create secret tls webhook-tls \
   -n webhook-system
 ==============
 # Build the image
-docker build -t manoharshetty507/webhook:v2 .
+docker build -t manoharshetty507/webhook:v3 .
+docker tag manoharshetty507/webhook:v3 manoharshetty507/webhook:v3
 ctr -n k8s.io images import <(docker save manoharshetty507/webhook:v3)
+docker push manoharshetty507/webhook:v3
 ===========================================
-kubectl rollout restart deployment webhook -n webhook-system
-kubectl delete deployment nginx -n test --ignore-not-found
-kubectl create deployment nginx --image=nginx -n test
-kubectl get pods -n test --show-labels
-===========================================================
-kubectl rollout restart deployment webhook -n webhook-system
-kubectl delete deployment nginx -n test --ignore-not-found
-kubectl create deployment nginx --image=nginx -n test
-kubectl get pods -n test --show-labels
-
-
-===========================================================
-encode
+# encode
 base64 -w0 tls.crt
+kubectl apply -f webhook-configuration.yaml
+kubectl apply -f webhook-deployment.yaml
+kubectl get mutatingwebhookconfigurations
+# Test it
+kubectl delete deployment nginx -n test --ignore-not-found
+kubectl create deployment nginx --image=nginx -n test
+kubectl get pods -n test --show-labels
+===========================================================
+kubectl rollout restart deployment webhook -n webhook-system
+kubectl delete deployment nginx -n test --ignore-not-found
+kubectl create deployment nginx --image=nginx -n test
+kubectl get pods -n test --show-labels
+
+kubectl rollout restart deployment webhook -n webhook-system
+===========================================================
+
 ==========================================================
 kubectl delete deployment nginx -n test --ignore-not-found
 kubectl create deployment nginx --image=nginx -n test

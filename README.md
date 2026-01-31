@@ -208,9 +208,9 @@ ns-label-sync=enabled
 ```
 Example: Default Namespace
 ```
-kubectl label namespace default ns-label-sync=enabled --overwrite
-kubectl label namespace default env=from-ns --overwrite
-kubectl label namespace default team=devops --overwrite
+kubectl label namespace prod ns-label-sync=enabled --overwrite
+kubectl label namespace prod env=prod --overwrite
+kubectl label namespace prod team=devops --overwrite
 ```
 Test Pod
 ```

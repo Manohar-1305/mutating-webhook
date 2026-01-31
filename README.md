@@ -3,77 +3,55 @@ Namespace Label Injection & Pod Scheduling Enforcement
 
 This project implements a Mutating Admission Webhook that automatically injects Namespace labels into Pods and Deployments at creation time.
 
-The goal is simple and strict:
-
+* The goal is simple and strict:
 Namespaces define policy
-
 Pods inherit labels automatically
-
 Scheduling is controlled centrally
-
 Developers do not manage platform labels
 
-Why This Exists
-
+* Why This Exists
 In real clusters:
-
 Teams forget labels
-
 Labels drift
-
 Scheduling rules break silently
 
 Cost, security, and ownership tracking become unreliable
 
 This webhook eliminates human error by enforcing labels at admission time, before objects are stored in etcd.
 
-High-Level Flow
+* High-Level Flow
 
 What happens internally:
-
 Namespace is labeled (e.g. team=testing, env=prod)
-
 Pod / Deployment creation request hits API Server
-
 Mutating Webhook intercepts the request
-
 Namespace labels are injected into the Pod spec
-
 Scheduler places the Pod based on injected labels
-
 No controllers.
 No sidecars.
 No runtime overhead.
 
-Prerequisites
-
-Kubernetes cluster (kubeadm)
-
+* Prerequisites
+Kubernetes cluster 
 Access to control-plane node
-
 Docker + containerd
-
 OpenSSL
-
 kubectl
 
-Step 1: Enable Admission Webhooks
+  **Step 1: Enable Admission Webhooks
 
 Edit the API server manifest:
-
 vi /etc/kubernetes/manifests/kube-apiserver.yaml
-
-
 Update the admission plugins:
-
+```
 --enable-admission-plugins=NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
-
+```
 
 Important:
 If this flag is missing, the webhook will never be invoked.
 Kubernetes will not warn you.
 
-Step 2: Generate TLS Certificate (SAN Required)
+** Step 2: Generate TLS Certificate (SAN Required)
 Create SAN Configuration
 cat > san.cnf <<EOF
 [req]

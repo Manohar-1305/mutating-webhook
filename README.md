@@ -163,8 +163,10 @@ kubectl apply -f webhook-deployment.yaml
 Encode Certificate
 ```
 base64 -w0 tls.crt
-Verify
 ```
+Verify
+
+
 * Create mutating webhook resources
 * * Note: Be sure to change caBundle with your encoded certificate.
 vi webhook-configurations.yaml

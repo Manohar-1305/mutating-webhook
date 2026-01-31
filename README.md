@@ -110,35 +110,111 @@ Push to Registry
 docker push manoharshetty507/webhook:v3
 ```
 * Step 5: Apply Webhook Manifests
+
+* Create  Resources
+vi webhook-deployment.yaml
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ns-label-webhook
+  namespace: webhook-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook
+  template:
+    metadata:
+      labels:
+        app: webhook
+    spec:
+      serviceAccountName: webhook-sa
+      containers:
+      - name: webhook
+        image: manoharshetty507/webhook:v1
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: tls
+          mountPath: /tls
+          readOnly: true
+      volumes:
+      - name: tls
+        secret:
+          secretName: webhook-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-service
+  namespace: webhook-system
+spec:
+  ports:
+  - port: 443
+    targetPort: 8443
+  selector:
+    app: webhook
+```
+* Apply the deployment
+```
+kubectl apply -f webhook-deployment.yaml
+```
 Encode Certificate
 ```
 base64 -w0 tls.crt
-```
-* Apply Resources
-```
-kubectl apply -f webhook-configuration.yaml
-kubectl apply -f webhook-deployment.yaml
-```
-
 Verify
 ```
-kubectl get mutatingwebhookconfigurations
+* Create mutating webhook resources
+* * Note: Be sure to change caBundle with your encoded certificate.
+vi webhook-configurations.yaml
 ```
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: ns-label-webhook
+webhooks:
+- name: ns-label-webhook.webhook-system.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Ignore
+  timeoutSeconds: 5
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: webhook-system
+      path: /mutate
+      port: 443
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURqVENDQW5XZ0F3SUJBZ0lVU3NoeURzZFJSUjNDTXA0VG9XMDFaYU5Ub0VVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0xURXJNQ2tHQTFVRUF3d2lkMlZpYUc5dmF5MXpaWEoyYVdObExuZGxZbWh2YjJzdGMzbHpkR1Z0TG5OMgpZekFlRncweU5qQXhNamt3T1RVMU16VmFGdzB5TnpBeE1qa3dPVFUxTXpWYU1DMHhLekFwQmdOVkJBTU1JbmRsClltaHZiMnN0YzJWeWRtbGpaUzUzWldKb2IyOXJMWE41YzNSbGJTNXpkbU13Z2dFaU1BMEdDU3FHU0liM0RRRUIKQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUURHaVM0TUxDVkR4dEl1OEdkVjRHWFZqb0o4bkh6YTM4d1JXd0w4cjIzTAozVmJKaW1EVmpqcmhUZGk4ekdGTSs4T2ZHWDVjQm9uZURuZ0FDTVRHTE9QdDZaalRUZXI4K2VkbjBuaEdSaHNICmxEeVlBU1Q5Y1Jhb3pPdXZqNlpNU3NTNDRSQWFaYlJqb2dZdmY3Q0JzVlNLQnViY2tITlFsaFkwcWtkVGdTd3YKN0VwUHlSakdCcEtCTmNBVnFORjN3YXR3OE5JRXNEVlFwMFN2Y1ZSd3crS215am9OV0pSRnRZM1hULzhhT0llQwo2SVhwRVdncHZvWjZDMWNYZnZRY3hrVDVrN01HM2duR0dxZW4zeTBBSzZsU2FwRTdmRVZhWFhLSXZwR0hWbklNCjE4NEg3U1JoQ2V0WlorZVRNQWpFc1dVNFREK3VxZmw5ZnBpZW5TTzZjU1hGQWdNQkFBR2pnYVF3Z2FFd0N3WUQKVlIwUEJBUURBZ1F3TUJNR0ExVWRKUVFNTUFvR0NDc0dBUVVGQndNQk1GNEdBMVVkRVFSWE1GV0NEM2RsWW1odgpiMnN0YzJWeWRtbGpaWUllZDJWaWFHOXZheTF6WlhKMmFXTmxMbmRsWW1odmIyc3RjM2x6ZEdWdGdpSjNaV0pvCmIyOXJMWE5sY25acFkyVXVkMlZpYUc5dmF5MXplWE4wWlcwdWMzWmpNQjBHQTFVZERnUVdCQlNRclZCZ0VvUWQKUWRWUEhzcWpsWmdGSkdJRVJUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFHY0VZdEp5NHFZTzZHOXdqS3BLMQp2U3lsZG9EeDNydXh3UXN3U3RKbWZMd3lYMU1WYzZUdUZ1Q0YyRi9sdnVJOEdrZG50VUE0dWd5VksyTHU0Qm9PCmFSTWpJaFJuWkkxMWZOSXVlMDRGRXpIOWhVRDh1aVVubUlsYjJVNUhsMWRSVXZKckZsQmtURldoSGdCZll2dzkKQTU1MXBWOTliK2NES29MR0VDVXhMeE1xWHdKdktBQ3M0MnJScmZDbGZHUmF0amg2QmdHaEo4Y25hYmwzU2IrQwoxR3dodlRJOGdHUmoya29EaW9idTFEVTk3a3VxNWdBNmZ2Vk9CeitqU1BzL1d6NmVtZ3d5ekN3aDRvcUpDVkdaCnF5MkgzYnl5M2pWME9FcXhxRVpaN3FmcVRVeHJLYWVBbVFGYlZpanhZbzAwY1k2WTFaU1VQV1JKeWhVajNFczQKOXc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  rules:
+  - operations: ["CREATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+  namespaceSelector:
+    matchExpressions:
+    - key: ns-label-sync
+      operator: In
+      values: ["enabled"]
+
+```
+kubectl get mutatingwebhookconfigurations
 * Step 6: Enable Webhook per Namespace
 The webhook runs only if the namespace has this label:
-
 ```
 ns-label-sync=enabled
 ```
 Example: Default Namespace
+```
 kubectl label namespace default ns-label-sync=enabled --overwrite
 kubectl label namespace default env=from-ns --overwrite
 kubectl label namespace default team=devops --overwrite
-
+```
 Test Pod
+```
 kubectl apply -f testing-pod.yaml
 kubectl get pod test-pod -n default --show-labels
-
+```
 
 Result:
 Pod automatically inherits namespace labels.

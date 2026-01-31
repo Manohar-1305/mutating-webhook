@@ -56,7 +56,11 @@ kubectl get mutatingwebhookconfigurations
 =========================
 working
 =========================
+Add mutaring webhook
+vi /etc/kubernetes/manifests/kube-apiserver.yaml
 
+change it to: --enable-admission-plugins=NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
+===============
 Generate a san
 ===============
 cat > san.cnf <<EOF
@@ -79,6 +83,7 @@ DNS.2 = webhook-service.webhook-system
 DNS.3 = webhook-service.webhook-system.svc
 EOF
 ===========================================
+# Create a certificate
 openssl genrsa -out tls.key 2048
 
 openssl req -new -key tls.key -out tls.csr -config san.cnf
@@ -89,7 +94,7 @@ openssl x509 -req -in tls.csr -signkey tls.key \
 
  ===========
 kubectl delete secret webhook-tls -n webhook-system --ignore-not-found
-
+# Create a secret
 kubectl create secret tls webhook-tls \
   --cert=tls.crt \
   --key=tls.key \
@@ -106,11 +111,9 @@ kubectl create deployment nginx --image=nginx -n test
 kubectl get pods -n test --show-labels
 
 ==============
-Add mutaring webhook
-vi /etc/kubernetes/manifests/kube-apiserver.yaml
-
-change it to: --enable-admission-plugins=NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
-
+# Build the image
+docker build -t manoharshetty507/webhook:v2 .
+ctr -n k8s.io images import <(docker save manoharshetty507/webhook:v3)
 ===========================================================
 encode
 base64 -w0 tls.crt

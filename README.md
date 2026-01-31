@@ -214,7 +214,6 @@ kubectl label namespace prod team=devops --overwrite
 ```
 Test Pod
 ```
-kubectl apply -f testing-pod.yaml
 kubectl get pod -n default -l app=nginx --show-labels
 
 ```
@@ -222,7 +221,36 @@ kubectl get pod -n default -l app=nginx --show-labels
 Result:
 Pod automatically inherits namespace labels.
 
-* Step 7: Full Scheduling Test
+* Test the sample deployment
+
+Testing Team:
+-------------
+# 1️⃣ Create a new namespace
+```
+kubectl create namespace testing
+```
+# 2️⃣ Label the namespace so the webhook applies
+```
+kubectl label namespace testing ns-label-sync=enabled env=testing team=testing --overwrite
+```
+# 3. Show Labels on Namespace
+```
+kubectl get namespace testing --show-labels
+```
+# 3️⃣ Create a test deployment in that namespace
+```
+kubectl create deployment nginx --image=nginx -n testing
+```
+# 4️⃣ Verify pods and labels
+```
+kubectl get pods -n testing --show-labels
+```
+# 5️⃣ Describe one pod to confirm labels came from the namespace
+```
+kubectl get pod -n testing -o jsonpath='{.items[0].metadata.labels}'
+```
+
+* Step 7: Full Scheduling on a Node
 Create Testing Namespace
 ```
 kubectl create namespace testing
@@ -243,6 +271,20 @@ Deploy Application
 ```
 kubectl create deployment nginx --image=nginx -n testing
 ```
+Testing Team:
+-------------
+# 1️⃣ Create a new namespace
+kubectl create namespace testing
+
+# 2️⃣ Label the namespace so the webhook applies
+```
+kubectl label namespace testing ns-label-sync=enabled env=testing team=testing --overwrite
+```
+* Check Namespace Labels
+```
+kubectl get namespace testing --show-labels
+```
+* Check Pod Labels
 ```
 kubectl get pods -n testing --show-labels
 ```

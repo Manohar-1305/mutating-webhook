@@ -211,7 +211,8 @@ Example: Default Namespace
 kubectl label namespace default ns-label-sync=enabled --overwrite
 kubectl label namespace default env=prod --overwrite
 kubectl label namespace default team=devops --overwrite
-kubectl create deployment nginx --image=nginx default
+kubectl create deployment nginx --image=nginx -n default
+
 ```
 Test Pod
 ```
